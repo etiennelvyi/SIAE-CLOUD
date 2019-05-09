@@ -1,0 +1,68 @@
+TD1
+EX1
+一、创建一个trigger使得无法对prix做减小的更改。
+create trigger<te_prix>
+before update of prix on article
+for each row
+begin
+ if:new.prix<:old.prix then
+    raise application_error(20100,'le prix neut pas insert');
+ end if
+ end;
+
+//
+1.new前的:表示告诉系统后面的参量为系统定义的关键字，需在begin后
+添加。
+2.
+new和old为两个参量，为两行带有所有列信息的数据，在trigger后由系统产生。需要加上each row.
+3.错误代码可以自定义
+4.check只可以对同一表格，已存在的参量做判断，故在此不可用
+
+二、创建一个trigger使得无法让一个表格的时间数据不可以超过另一个(目的是将两个表格通过一个表格建立联系)
+create trigger<te_date>
+before insert or update on DétailLivraison
+for each row
+
+dateco command.date%type,
+dateliv livraison.dateliv%type,
+
+begin
+select datecommande into dateco
+       from commande
+       where nocommande=:new.Nocommande;
+       select datelivraison into dateliv 
+       from livraison
+       where nolivraison=:new.nolivraison;
+       
+ if dateco<dateliv then
+    raise application_error(20100,'le prix neut pas insert');
+ end if
+ end;    
+
+
+EX2
+1.
+ALTER TABLE VOL ADD CONSTRAINT CK_VILLE
+   CHECK (villedepart<>villearrivee)
+
+ //check可以对表格加上限制
+
+2.
+ALTER TABLE VOL ADD CONSTRAINT NOTNULL
+check(#numéroCommandantBord is not null)
+
+3.
+create trigger<te_vol>
+before insert on copilot
+for each row
+commandantbord vol.numero%type,
+
+begin
+select numerocommandantbord into commandantbord
+       from vol
+       where numerovol=:new.numerovol;
+       
+ if commandantbord=:new.numeropilot then
+    raise application_error(20100,'le prix neut pas insert');
+ end if
+ end;    
